@@ -11,7 +11,7 @@ PROJECT = $(NAME_MODULE)
 
 #GCC_PATH	= $(HOME)/workspace/tools/gcc-arm-none-eabi-8-2018-q4-major
 GCC_PATH	= ../../tools/gcc-arm-none-eabi-8-2018-q4-major
-#GCC_PATH	= ../../tools/gcc-arm-none-eabi-7-2017-q4-major
+#GCC_PATH	= $(HOME)/workspace/tools/gcc-arm-none-eabi-7-2017-q4-major
 #OPENOCD_PATH	= $(HOME)/workspace/tools/openocd
 
 # Include sources file
