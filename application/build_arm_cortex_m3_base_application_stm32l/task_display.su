@@ -1,0 +1,3 @@
+task_display.cpp:52:6:void task_display(ak_msg_t*)	0	static
+task_display.cpp:86:6:void view_scr_startup()	48	dynamic
+task_display.cpp:56:6:void scr_startup_handle(ak_msg_t*)	8	static
