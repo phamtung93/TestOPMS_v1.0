@@ -1,4 +1,5 @@
 #include "button.h"
+#include "xprintf.h"
 
 uint8_t button_init(button_t* button, uint32_t u, uint8_t id, pf_button_ctrl init, pf_button_read read, pf_button_callback callback) {
 	button->enable		=	BUTTON_DISABLE;

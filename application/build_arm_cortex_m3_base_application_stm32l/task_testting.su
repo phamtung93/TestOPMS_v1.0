@@ -1,0 +1,5 @@
+task_testting.cpp:47:6:void testting_result_init(testting_result_t*)	8	static
+task_testting.cpp:103:6:void task_testting(ak_msg_t*)	16	static
+task_testting.cpp:168:6:void button_press_cb(button_t*)	16	static
+task_testting.cpp:201:6:void cli_irq_add(uint8_t)	16	static
+task_testting.cpp:227:6:void rs485_irq_add(uint8_t)	16	static

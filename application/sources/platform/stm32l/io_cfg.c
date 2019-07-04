@@ -311,7 +311,7 @@ void timer_50us_init() {
 	/* timer 50us to polling receive IR signal */
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
 	timer_50us.TIM_Period = 1592;
-	timer_50us.TIM_Prescaler = 0;
+	timer_50us.TIM_Prescaler = 10;
 	timer_50us.TIM_ClockDivision = 0;
 	timer_50us.TIM_CounterMode = TIM_CounterMode_Down;
 	TIM_TimeBaseInit(TIM6, &timer_50us);
@@ -1180,7 +1180,14 @@ uint8_t internal_flash_write_cal(uint32_t address, uint8_t* data, uint32_t len) 
 	return 1;
 }
 
-void io_uart3_cli(uint16_t BAURATE) {
+/******************************************************************************
+* CLI Test - USART 3 - PB10 PB11 function
+*******************************************************************************/
+/**
+ * @brief io_uart3_cli
+ * @param BAURATE
+ */
+void io_uart3_cli_init(uint32_t BAURATE) {
 	USART_InitTypeDef USART_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -1200,12 +1207,12 @@ void io_uart3_cli(uint16_t BAURATE) {
 	/* Configure USART Tx and Rx as alternate function push-pull */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	/* USARTx configuration */
@@ -1219,7 +1226,7 @@ void io_uart3_cli(uint16_t BAURATE) {
 
 	/* Enable the USARTx Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = IRQ_PRIO_UART0_CONSOLE;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -1228,11 +1235,19 @@ void io_uart3_cli(uint16_t BAURATE) {
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 
 	/* Enable USART */
+	USART_Cmd(USART3, DISABLE);
+}
+
+void io_cli_enable() {
 	USART_Cmd(USART3, ENABLE);
 }
 
+void io_cli_disable() {
+	USART_Cmd(USART3, DISABLE);
+}
+
 /**
- * @brief uart2_cli_put
+ * @brief uart3_cli_put
  * @param c
  */
 void io_uart3_cli_put(uint8_t c) {
@@ -1243,8 +1258,19 @@ void io_uart3_cli_put(uint8_t c) {
 	USART_SendData(USART3, (uint8_t)c);
 }
 
+void uart3_cli_send_string(char* s) {
+	int i =0;
+
+	while (s[i] != 0x00)
+	{
+		io_uart3_cli_put(s[i]);
+		i++;
+	}
+}
+
+
 /**
- * @brief io_uart2_cli_get
+ * @brief io_uart3_cli_get
  * @return charecter
  */
 uint8_t io_uart3_cli_get() {
@@ -1255,10 +1281,405 @@ uint8_t io_uart3_cli_get() {
 		USART_ClearITPendingBit(USART3, USART_IT_RXNE);
 	}
 
-	APP_DBG ("a");
+	return (uint8_t)c;
+}
+
+/**
+ * @brief io_cli_led_init
+ */
+void io_cli_led_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
+/**
+ * @brief io_cli_led_on
+ */
+void io_cli_led_on() {
+	GPIO_SetBits (GPIOB, GPIO_Pin_12);
+}
+
+/**
+ * @brief io_cli_led_off
+ */
+void io_cli_led_off() {
+	GPIO_ResetBits (GPIOB, GPIO_Pin_12);
+}
+
+/******************************************************************************
+* input control pin function - PA0 - PA1
+*******************************************************************************/
+void io_input_control_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+void io_input_control_1_high() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_0);
+}
+
+void io_input_control_1_low() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_0);
+}
+
+void io_input_control_2_high() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_1);
+}
+
+void io_input_control_2_low() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_1);
+}
+
+/******************************************************************************
+* input led pin function - PD1 PD0 PC15 PC14 PC13 PB9 PB8 PB7
+*******************************************************************************/
+void io_input_leds_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOD, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_8 | GPIO_Pin_7;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
+void io_input_leds_on(uint8_t index) {
+	assert_param (index < 8);
+	assert_param (index >=0 );
+	switch (index) {
+	case 0:
+		GPIO_SetBits (GPIOD, GPIO_Pin_1);
+		break;
+	case 1:
+		GPIO_SetBits (GPIOD, GPIO_Pin_0);
+		break;
+	case 2:
+		GPIO_SetBits (GPIOC, GPIO_Pin_15);
+		break;
+	case 3:
+		GPIO_SetBits (GPIOC, GPIO_Pin_14);
+		break;
+	case 4:
+		GPIO_SetBits (GPIOC, GPIO_Pin_13);
+		break;
+	case 5:
+		GPIO_SetBits (GPIOB, GPIO_Pin_9);
+		break;
+	case 6:
+		GPIO_SetBits (GPIOB, GPIO_Pin_8);
+		break;
+	case 7:
+		GPIO_SetBits (GPIOB, GPIO_Pin_7);
+		break;
+	}
+}
+
+void io_input_leds_off(uint8_t index) {
+	assert_param (index < 8);
+	assert_param (index >=0 );
+	switch (index) {
+	case 0:
+		GPIO_ResetBits (GPIOD, GPIO_Pin_1);
+		break;
+	case 1:
+		GPIO_ResetBits (GPIOD, GPIO_Pin_0);
+		break;
+	case 2:
+		GPIO_ResetBits (GPIOC, GPIO_Pin_15);
+		break;
+	case 3:
+		GPIO_ResetBits (GPIOC, GPIO_Pin_14);
+		break;
+	case 4:
+		GPIO_ResetBits (GPIOC, GPIO_Pin_13);
+		break;
+	case 5:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_9);
+		break;
+	case 6:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_8);
+		break;
+	case 7:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_7);
+		break;
+	}
+}
+
+/******************************************************************************
+* RS485 Test - USART2 - PA2 PA3  - DIR_PIN PA4 - LED - PB1 function
+*******************************************************************************/
+void io_rs485_uart_init() {
+	USART_InitTypeDef USART_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	/* Enable GPIO clock */
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	/* Enable USART clock */
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
+	/* Connect PXx to USARTx_Tx */
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+
+	/* Connect PXx to USARTx_Rx */
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+
+	/* Configure USART Tx and Rx as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	//GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	/* USARTx configuration */
+	USART_InitStructure.USART_BaudRate = 9600;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	USART_Init(USART2, &USART_InitStructure);
+
+	/* Enable the USARTx Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	USART_ClearITPendingBit(USART2, USART_IT_RXNE | USART_IT_TXE);
+	//USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+
+	/* Enable USART */
+	USART_Cmd(USART2, ENABLE);
+}
+
+void io_rs485_enable() {
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void io_rs485_disabble() {
+	USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+}
+
+void io_rs485_uart_send(uint8_t byte) {
+	/* wait last transmission completed */
+	while (USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET);
+
+	/* put transnission data */
+	USART_SendData(USART3, (uint8_t)byte);
+}
+
+uint8_t io_rs485_uart_get() {
+	volatile uint8_t c;
+
+	if (USART_GetITStatus(USART3, USART_IT_RXNE) == SET) {
+		c = (uint8_t)USART_ReceiveData(USART3);
+		USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+	}
 
 	return c;
 }
+
+
+// PA4 - DIR PIN
+void io_rs485_dir_pin_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
+
+void io_rs485_dir_pin_high() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_4);
+}
+
+void io_rs485_dir_pin_low() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_4);
+}
+
+// PB1 - RS485 LED PIN
+void io_rs485_led_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+}
+void io_rs485_led_on() {
+	GPIO_SetBits (GPIOB, GPIO_Pin_1);
+}
+void io_rs485_led_off() {
+	GPIO_ResetBits (GPIOB, GPIO_Pin_1);
+}
+
+/******************************************************************************
+* TEMP LED - PB0 PA7 PA6 PA5 function
+*******************************************************************************/
+void io_temp_leds_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+void io_temp_1_led_on() {
+	GPIO_SetBits (GPIOB, GPIO_Pin_0);
+}
+void io_temp_1_led_off() {
+	GPIO_ResetBits (GPIOB, GPIO_Pin_0);
+}
+void io_temp_2_led_on() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_7);
+}
+void io_temp_2_led_off() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_7);
+}
+void io_temp_3_led_on() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_6);
+}
+void io_temp_3_led_off() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_6);
+}
+void io_temp_4_led_on() {
+	GPIO_SetBits (GPIOA, GPIO_Pin_5);
+}
+void io_temp_4_led_off() {
+	GPIO_ResetBits (GPIOA, GPIO_Pin_5);
+}
+
+/******************************************************************************
+* Button - PA11 PA12 PB13 function
+*******************************************************************************/
+void io_button_init() {
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_11 | GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_13;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+uint8_t io_button_1_read() {
+	return  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_11);
+}
+uint8_t io_button_2_read() {
+	return  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_12);
+}
+uint8_t io_button_3_read() {
+	return  GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_13);
+}
+
+/******************************************************************************
+* FAN Fns LEDS - PB6 PB5 PB4 PB3  function
+*******************************************************************************/
+void io_fan_fn_leds_init() {
+	GPIO_InitTypeDef        GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_5 | GPIO_Pin_4 | GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+void io_fan_leds_on(uint8_t index) {
+	assert_param (index < 4);
+	assert_param (index >=0 );
+	switch (index) {
+	case 0:
+		GPIO_SetBits (GPIOB, GPIO_Pin_6);
+		break;
+	case 1:
+		GPIO_SetBits (GPIOB, GPIO_Pin_5);
+		break;
+	case 2:
+		GPIO_SetBits (GPIOB, GPIO_Pin_4);
+		break;
+	case 3:
+		GPIO_SetBits (GPIOB, GPIO_Pin_3);
+		break;
+	}
+}
+void io_fan_leds_off(uint8_t index) {
+	assert_param (index < 4);
+	assert_param (index >=0 );
+	switch (index) {
+	case 0:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_6);
+		break;
+	case 1:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_5);
+		break;
+	case 2:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_4);
+		break;
+	case 3:
+		GPIO_ResetBits (GPIOB, GPIO_Pin_3);
+		break;
+	}
+}
+
+
 
 #if defined(USING_USB_MOD)
 void usb_cfg() {

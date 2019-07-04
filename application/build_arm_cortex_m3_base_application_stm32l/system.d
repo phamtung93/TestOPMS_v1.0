@@ -71,4 +71,5 @@ build_arm_cortex_m3_base_application_stm32l/system.o: \
  sources/platform/stm32l/system.h sources/common/xprintf.h \
  /mnt/c/OneDrive\ -\ CONG\ TY\ CO\ PHAN\ FPT/1\ .\ Projects/1.\ Outdoor\ Prj/0.\ Sources\ Code/tools/gcc-arm-none-eabi-8-2018-q4-major/lib/gcc/arm-none-eabi/8.2.1/include/stdarg.h \
  sources/sys/sys_ctrl.h sources/sys/sys_irq.h sources/sys/sys_svc.h \
- sources/ak/inc/timer.h sources/ak/inc/timer.h sources/app/app.h
+ sources/ak/inc/timer.h sources/ak/inc/timer.h sources/app/app.h \
+ sources/platform/stm32l/io_cfg.h sources/driver/rtc/rtc.h

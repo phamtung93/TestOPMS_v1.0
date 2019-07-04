@@ -1,7 +1,8 @@
-app.cpp:70:5:int main_app()	16	static
-app.cpp:166:6:void sys_irq_timer_10ms()	0	static
-app.cpp:175:6:void sys_irq_timer_50us()	0	static
-app.cpp:181:6:void sys_irq_timer_hs1101()	0	static
-app.cpp:187:6:void sys_irq_ir_io_rev()	0	static
-app.cpp:190:6:void sys_irq_usb_recv(uint8_t*, uint32_t)	0	static
-app.cpp:195:7:void* app_get_boot_share_data()	0	static
+app.cpp:71:5:int main_app()	40	static
+app.cpp:176:6:void sys_irq_timer_10ms()	0	static
+app.cpp:185:6:void sys_irq_timer_50us()	8	static
+app.cpp:194:6:void sys_irq_timer_hs1101()	0	static
+app.cpp:200:6:void sys_irq_ir_io_rev()	0	static
+app.cpp:203:6:void sys_irq_usb_recv(uint8_t*, uint32_t)	0	static
+app.cpp:208:7:void* app_get_boot_share_data()	0	static
+app.cpp:213:6:void assert_failed(uint8_t*, uint32_t)	0	static

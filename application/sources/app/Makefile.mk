@@ -16,6 +16,7 @@ SOURCES_CPP += sources/app/task_life.cpp
 SOURCES_CPP += sources/app/task_fw.cpp
 SOURCES_CPP += sources/app/task_list.cpp
 SOURCES_CPP += sources/app/task_display.cpp
+SOURCES_CPP += sources/app/task_testting.cpp
 
 SOURCES_CPP += sources/app/task_if.cpp
 SOURCES_CPP += sources/app/task_rf24_if.cpp

@@ -21,6 +21,23 @@ extern "C"
 #include "app_data.h"
 
 /*****************************************************************************/
+/*  TESTTING task define
+ */
+/*****************************************************************************/
+/* define timer */
+
+/* define signal */
+enum {
+	TESTTING_INIT = AK_USER_DEFINE_SIG,
+	TESTTING_CLI_CHECK_REQ ,
+	TESTTING_CLI_RECV,
+	TESTTING_RS485_CHECK_REQ,
+	TESTTING_RS485_RECV,
+	TESTTING_GPI_CHECK_REQ,
+	TESTTING_GPO_CHECK_REQ
+};
+
+/*****************************************************************************/
 /* FIRMWARE task define
  */
 /*****************************************************************************/

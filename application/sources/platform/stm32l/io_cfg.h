@@ -331,25 +331,45 @@ extern void usb_send(uint8_t* buf, uint8_t len);
 /******************************************************************************
 * CLI Test - USART 2 - PB10 PB11 function
 *******************************************************************************/
-extern void io_uart3_cli(uint16_t BAURATE);
-extern uint8_t io_uart3_cli_get();
-extern void io_uart3_cli_put(uint8_t c);
+extern void		io_uart3_cli_init(uint32_t BAURATE);
+
+extern void		io_cli_disable();
+extern void		io_cli_enable();
+
+extern uint8_t	io_uart3_cli_get();
+extern void		io_uart3_cli_put(uint8_t c);
+extern void		uart3_cli_send_string(char * s);
+extern void		io_cli_led_init();
+
+extern void		io_cli_led_on();
+extern void		io_cli_led_off();
+
 
 /******************************************************************************
 * input control pin function - PA0 - PA1
 *******************************************************************************/
-extern void io_input_control_init();
-extern void io_input_control_1_high();
-extern void io_input_control_1_low();
-extern void io_input_control_2_high();
-extern void io_input_control_2_low();
+extern void		io_input_control_init();
+extern void		io_input_control_1_high();
+extern void		io_input_control_1_low();
+extern void		io_input_control_2_high();
+extern void		io_input_control_2_low();
+
+extern void		io_input_leds_init();
+extern void		io_input_leds_on(uint8_t index);
+extern void		io_input_leds_off(uint8_t index);
 
 /******************************************************************************
 * RS485 Test - USART2 - PA2 PA3  - DIR_PIN PA4 - LED - PB1 function
 *******************************************************************************/
 extern void		io_rs485_uart_init();
+
+extern void		io_rs485_enable();
+extern void		io_rs485_disable();
+
 extern void		io_rs485_uart_send(uint8_t byte);
 extern uint8_t	io_rs485_uart_get();
+
+extern void		io_rs485_dir_pin_init();
 extern void		io_rs485_dir_pin_high();
 extern void		io_rs485_dir_pin_low();
 
@@ -374,15 +394,16 @@ extern void		io_temp_4_led_off();
 * Button - PA11 PA12 function
 *******************************************************************************/
 extern void		io_button_init();
-extern void		io_button_1_read();
-extern void		io_button_2_read();
-extern void		io_button_3_read();
+extern uint8_t	io_button_1_read();
+extern uint8_t	io_button_2_read();
+extern uint8_t	io_button_3_read();
 
 /******************************************************************************
-* GPI LEDS -  function
+* FAN Fns LEDS -  function
 *******************************************************************************/
-extern void		io_button_init();
-extern void		io_button_read();
+extern void		io_fan_fn_leds_init();
+extern void		io_fan_leds_on(uint8_t index);
+extern void		io_fan_leds_off(uint8_t index);
 
 #ifdef __cplusplus
 }

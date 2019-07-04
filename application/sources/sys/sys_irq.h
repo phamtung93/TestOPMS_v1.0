@@ -17,6 +17,8 @@ extern void sys_irq_timer_50us();
 extern void sys_irq_timer_10ms();
 extern void sys_irq_timer_hs1101();
 extern void sys_irq_usb_recv(uint8_t* data, uint32_t len);
+extern void rs485_irq_add(uint8_t byte);
+extern void cli_irq_add(uint8_t byte);
 
 #ifdef __cplusplus
 }

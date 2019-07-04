@@ -31,6 +31,7 @@
 #include "task_rf24_if.h"
 #include "task_uart_if.h"
 #include "task_display.h"
+#include "task_testting.h"
 
 /* sys include */
 #include "sys_boot.h"
@@ -102,7 +103,18 @@ int main_app() {
 	/* life led init */
 	led_init(&led_life, led_life_init, led_life_on, led_life_off);
 
-	io_uart3_cli(9600);
+	/* button init */
+	button_init (&button_cli,		1, 1, io_button_init , io_button_3_read, (pf_button_callback)button_press_cb );
+	button_init (&button_rs485,		1, 2, io_button_init , io_button_2_read, (pf_button_callback)button_press_cb );
+	button_init (&button_all_test,	1, 3, io_button_init , io_button_1_read, (pf_button_callback)button_press_cb );
+
+	button_enable (&button_cli);
+	button_enable (&button_rs485);
+	button_enable (&button_all_test);
+
+	// timer for button polling
+	timer_50us_init();
+	timer_50us_enable ();
 
 	EXIT_CRITICAL();
 
@@ -135,24 +147,22 @@ int main_app() {
 void app_start_timer() {
 	/* start timer to toggle life led */
 	timer_set(AC_TASK_LIFE_ID, AC_LIFE_SYSTEM_CHECK, AC_LIFE_TASK_TIMER_LED_LIFE_INTERVAL, TIMER_PERIODIC);
+	//timer_set(AC_TASK_TESTTING_ID, TESTTING_GPO_CHECK_REQ, 1000, TIMER_PERIODIC);
+	;
 }
 
 /* init state machine for tasks
  * used for app tasks
  */
 void app_init_state_machine() {
+
 }
 
 /* send first message to trigger start tasks
  * used for app tasks
  */
 void app_task_init() {
-	//	SCREEN_CTOR(&scr_mng_app, scr_startup_handle, &scr_startup);
-
-	//	task_post_pure_msg(AC_TASK_FW_ID, FW_CHECKING_REQ);
-	//	task_post_pure_msg(AC_TASK_RF24_IF_ID, AC_RF24_IF_INIT_NETWORK);
-	//	task_post_pure_msg(AC_TASK_DISPLAY_ID, AC_DISPLAY_INITIAL);
-	//	task_post_pure_msg(AC_TASK_UART_IF_ID, AC_UART_IF_INIT);
+	task_post_pure_msg(AC_TASK_TESTTING_ID, TESTTING_INIT);
 }
 
 /*****************************************************************************/
@@ -164,15 +174,18 @@ void app_task_init() {
  * used for led, button polling
  */
 void sys_irq_timer_10ms() {
-	//	button_timer_polling(&btn_mode);
-	//	button_timer_polling(&btn_up);
-	//	button_timer_polling(&btn_down);
+		//button_timer_polling(&btn_mode);
+		//button_timer_polling(&btn_up);
+		//button_timer_polling(&btn_down);
 }
 
 /* hardware timer interrupt 50ms
  * used for encode and decode ir
  */
 void sys_irq_timer_50us() {
+	button_timer_polling (&button_all_test);
+	button_timer_polling (&button_rs485);
+	button_timer_polling (&button_cli);
 }
 
 /* hardware rtc interrupt alarm
@@ -195,3 +208,9 @@ void sys_irq_usb_recv(uint8_t* data, uint32_t len) {
 void* app_get_boot_share_data() {
 	return (void*)&boot_app_share_data;
 }
+
+
+void assert_failed(uint8_t* file, uint32_t line) {
+	xprintf("Assert fail at File %s Line %d", file, (int)line);
+}
+

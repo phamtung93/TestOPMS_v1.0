@@ -34,6 +34,8 @@
 
 #include "sys_cfg.h"
 
+#include "io_cfg.h"
+
 #pragma GCC optimize ("O3")
 
 /*****************************************************************************/
@@ -70,6 +72,7 @@ void timer6_irq();
 void timer4_irq();
 void timer7_irq();
 void usb_lp_irq();
+void usart2_irq();
 void usart3_irq();
 
 /* cortex-M processor fault exceptions */
@@ -155,12 +158,12 @@ void (* const isr_vector[])() = {
 		default_handler,						//	SPI1
 		default_handler,						//	SPI2
 		shell_handler,							//	USART1
-		shell_handler,							//	USART2
+		usart2_irq,								//	USART2
 		usart3_irq,								//	USART3
 		default_handler,						//	EXTI Line 15..10
 		default_handler,						//	RTC Alarm through EXTI Line
 		sys_irq_usb_recv,						//	USB FS Wakeup from suspend
-		default_handler,						//	TIM6
+		timer6_irq,								//	TIM6
 		timer7_irq,								//	TIM7
 		};
 
@@ -203,7 +206,7 @@ void reset_handler() {
 	volatile unsigned i, cnt;
 
 	/* init system */
-	SystemInit();
+	//SystemInit();
 
 	/* copy init data from FLASH to SRAM */
 	while(pDest < &_edata) {
@@ -439,9 +442,44 @@ void usb_lp_irq() {
 	task_exit_interrupt();
 }
 
+char array[64];
+uint8_t i = 0;
 
 void usart3_irq() {
 	task_entry_interrupt();
-	uint8_t c = io_uart3_cli_get();
+
+	uint8_t c;
+
+	if (USART_GetITStatus(USART3, USART_IT_RXNE) == SET) {
+		c = (uint8_t)USART_ReceiveData(USART3);
+		USART_ClearITPendingBit(USART3, USART_IT_RXNE);
+
+		array[i++] = c;
+		if(c== '\n') {
+
+			array[i] = 0;
+
+			USART_ITConfig(USARTx, USART_IT_TXE, DISABLE);
+
+			for (uint8_t var = 0; var < i; var++) {
+				sys_ctrl_shell_put_char_block(array[var]);
+			}
+
+			USART_ITConfig(USARTx, USART_IT_TXE, ENABLE);
+
+			i = 0;
+		}
+
+	}
+//	/cli_irq_add(c);
+
+	task_exit_interrupt();
+}
+
+void usart2_irq() {
+	task_entry_interrupt();
+	volatile uint8_t c = (uint8_t)io_rs485_uart_get();
+
+	rs485_irq_add(c);
 	task_exit_interrupt();
 }

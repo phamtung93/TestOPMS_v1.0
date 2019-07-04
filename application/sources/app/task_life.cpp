@@ -25,8 +25,6 @@ void task_life(ak_msg_t* msg) {
 		/* toggle led indicator */
 		led_toggle(&led_life);
 
-		io_uart3_cli_put ('a');
-
 		break;
 
 	default:
